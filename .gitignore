@@ -1,0 +1,17 @@
+# Python 虚拟环境
+.venv/
+venv/
+env/
+.dist/
+.build/
+build/
+dist/
+MyApp
+MyAppDebug
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./lib/vue.js"></script>
+    <script src="./lib/element-plus.js"></script>
+    <link rel="stylesheet" href="lib/element-plus.css">
+    <script src="lib/element-plus-locale-zh-cn.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            background-color: #101129;
+        }
+
+        .header {
+            height: 80px;
+            background-image: url(./img/top.png);
+            background-size: 100% 100%;
+            text-align: center;
+            color: #fff;
+            font-size: 26px;
+            line-height: 80px;
+            position: relative;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 70px;
+        }
+
+        .btn-left {
+            position: relative;
+            font-size: 18px;
+            font-weight: 400;
+            /* background-image: url(./img/btn.png); */
+            /* background-origin: ; */
+            background-size: 100% 100%;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 0 17px;
+            cursor: pointer;
+            width: 142px;
+            /* transform: rotate(180deg); */
+        }
+
+        .btn-left::after {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            content: '';
+            /* background-image: url(./img/btn.png); */
+            background-size: 100% 100%;
+            transform: rotate(180deg);
+            transform: scaleX(-1);
+        }
+
+        .btn-right {
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 400;
+            background-image: url(./img/btn.png);
+            background-size: 100% 100%;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 0 17px;
+            gap: 16px;
+        }
+
+        .header-actions span {
+            white-space: nowrap;
+        }
+
+        /* ===== 主机控制面板 HUD 弹窗 ===== */
+        .control-panel-dialog .el-dialog {
+            --el-dialog-bg-color: #050a1b;
+            background: #050a1b;
+            border: none;
+            border-radius: 0;
+            box-shadow: 0 0 40px rgba(0, 120, 255, 0.25);
+        }
+
+        .control-panel-dialog .el-dialog__header {
+            position: relative;
+            padding: 0;
+            margin: 0;
+            height: 0;
+            border: none;
+            overflow: visible;
+        }
+
+        .control-panel-dialog .el-dialog__title {
+            display: none;
+        }
+
+        .control-panel-dialog .el-dialog__body {
+            padding: 20px 22px 24px;
+            background: #050a1b;
+            color: #fff;
+        }
+
+        .control-panel-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .cp-box-glow {
+            position: relative;
+            background: rgba(8, 20, 48, 0.92);
+            padding: 18px 22px;
+            border: 1px solid rgba(0, 210, 255, 0.75);
+            box-shadow:
+                0 0 14px rgba(0, 200, 255, 0.35),
+                inset 0 0 24px rgba(0, 120, 255, 0.08);
+        }
+
+        .cp-box-inner {
+            position: relative;
+            background: rgba(6, 14, 36, 0.95);
+            padding: 16px 20px;
+            border: 1px solid rgba(35, 78, 140, 0.85);
+            box-shadow: inset 0 0 18px rgba(0, 60, 120, 0.12);
+        }
+
+        .cp-corner {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            pointer-events: none;
+        }
+
+        .cp-corner::before,
+        .cp-corner::after {
+            content: '';
+            position: absolute;
+            background: #00e8ff;
+            box-shadow: 0 0 8px rgba(0, 232, 255, 0.9);
+        }
+
+        .cp-corner-tl {
+            top: -1px;
+            left: -1px;
+        }
+
+        .cp-corner-tl::before {
+            top: 0;
+            left: 0;
+            width: 22px;
+            height: 2px;
+        }
+
+        .cp-corner-tl::after {
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 22px;
+        }
+
+        .cp-corner-tr {
+            top: -1px;
+            right: -1px;
+        }
+
+        .cp-corner-tr::before {
+            top: 0;
+            right: 0;
+            width: 22px;
+            height: 2px;
+        }
+
+        .cp-corner-tr::after {
+            top: 0;
+            right: 0;
+            width: 2px;
+            height: 22px;
+        }
+
+        .cp-corner-bl {
+            bottom: -1px;
+            left: -1px;
+        }
+
+        .cp-corner-bl::before {
+            bottom: 0;
+            left: 0;
+            width: 22px;
+            height: 2px;
+        }
+
+        .cp-corner-bl::after {
+            bottom: 0;
+            left: 0;
+            width: 2px;
+            height: 22px;
+        }
+
+        .cp-corner-br {
+            bottom: -1px;
+            right: -1px;
+        }
+
+        .cp-corner-br::before {
+            bottom: 0;
+            right: 0;
+            width: 22px;
+            height: 2px;
+        }
+
+        .cp-corner-br::after {
+            bottom: 0;
+            right: 0;
+            width: 2px;
+            height: 22px;
+        }
+
+        .cp-ticks {
+            position: absolute;
+            top: 4px;
+            left: 28px;
+            display: flex;
+            gap: 3px;
+            pointer-events: none;
+        }
+
+        .cp-ticks span {
+            width: 2px;
+            height: 8px;
+            background: rgba(0, 220, 255, 0.85);
+            box-shadow: 0 0 6px rgba(0, 220, 255, 0.8);
+        }
+
+        .cp-mode-row,
+        .cp-fe-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .cp-mode-text {
+            font-size: 17px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            color: #fff;
+        }
+
+        .cp-fe-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .cp-fe-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .cp-fe-status {
+            font-size: 14px;
+            color: #dcecff;
+        }
+
+        .cp-fe-actions {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .cp-reset-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cp-hud-btn {
+            appearance: none;
+            cursor: pointer;
+            min-width: 92px;
+            height: 38px;
+            padding: 0 18px;
+            border: 1px solid #00d4ff;
+            border-radius: 0;
+            background:
+                linear-gradient(180deg, rgba(12, 42, 82, 0.95) 0%, rgba(8, 28, 58, 0.95) 100%);
+            color: #fff;
+            font-size: 15px;
+            font-family: inherit;
+            letter-spacing: 1px;
+            box-shadow:
+                0 0 0 1px rgba(0, 180, 255, 0.25),
+                inset 0 0 16px rgba(0, 140, 255, 0.12);
+            transition: box-shadow 0.2s, background 0.2s;
+        }
+
+        .cp-hud-btn:hover {
+            background: linear-gradient(180deg, rgba(18, 58, 102, 0.98) 0%, rgba(12, 38, 72, 0.98) 100%);
+            box-shadow:
+                0 0 12px rgba(0, 220, 255, 0.45),
+                inset 0 0 20px rgba(0, 160, 255, 0.18);
+        }
+
+        .cp-hud-btn:active {
+            transform: translateY(1px);
+        }
+
+        .cp-reset-btn {
+            min-width: 110px;
+            height: 40px;
+        }
+
+        .control-panel-dialog .el-dialog__headerbtn {
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
+        }
+
+        .control-panel-dialog .el-dialog__headerbtn .el-dialog__close {
+            color: #00d8ff;
+            font-size: 18px;
+        }
+
+        .control-panel-dialog .el-dialog__headerbtn:hover .el-dialog__close {
+            color: #fff;
+        }
+
+        .control-panel-dialog.el-overlay-dialog,
+        .el-overlay:has(.control-panel-dialog) {
+            background-color: rgba(2, 6, 18, 0.72);
+        }
+
+        th {
+            font-weight: 900 !important;
+            font-size: 16px;
+        }
+
+        :root {
+            /* --el-bg-color: #143275; */
+            --el-bg-color:transparent;
+            --el-text-color-secondary: #fff;
+            --el-fill-color-blank: #0f2e6e;
+            --el-table-text-color: #fff;
+            --el-text-color-regular: #fff;
+            --el-fill-color-light: #007bff
+        }
+
+        .content {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .title {
+            color: #fff;
+            margin: 40px 0 20px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .title-left {
+            width: 38%;
+            color: #fff;
+            text-align: center;
+            background-image: url(./img/border.png);
+            background-size: 100% 100%;
+            padding: 20px 0;
+        }
+
+        .title-mid {
+            width: 26%;
+            color: #fff;
+            text-align: center;
+            background-image: url(./img/border.png);
+            background-size: 100% 100%;
+            padding: 20px 0;
+        }
+
+        .title-right {
+            width: 34%;
+            color: #fff;
+            text-align: center;
+            background-image: url(./img/border.png);
+            background-size: 100% 100%;
+            padding: 20px 0;
+        }
+
+        .left {
+            width: 38%;
+            height: 100%;
+            color: #fff;
+            background-image: url(./img/videoBox.png);
+            background-size: 100% 100%;
+            padding: 0px 20px;
+        }
+
+        .left_text{
+            color: #fff;
+            padding: 20px 0;
+            font-weight: 500;
+        }
+
+        .mid {
+            width: 26%;
+            height: 100%;
+            color: #fff;
+            background-image: url(./img/videoBox.png);
+            background-size: 100% 100%;
+            padding: 60px 20px;
+        }
+
+        .right {
+            width: 34%;
+            height: 100%;
+            color: #fff;
+            background-image: url(./img/videoBox.png);
+            background-size: 100% 100%;
+            padding: 60px 20px;
+        }
+        .right-one-text{
+            color: #fff;
+            margin: 20px 0;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .td_tags{
+            display: flex;
+        }
+        .dc-control-btn{
+            margin: 10px 0;
+            border: 0;
+        }
+
+        .close{
+            background-color: #101129;
+        }
+
+        .alarm-status-container{
+            display: flex;
+            justify-content: space-around;
+            flex-flow: row wrap;
+        }
+
+        .alarm-item{
+            width: 23%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .alarm-icon{
+            width: 80px;
+            height: 80px;
+        }
+        .alarm-label{
+            color: #fff;
+        }
+        .table{
+            max-height: 50%;
+        }
+
+        .tag-cus{
+            width: 60px;
+            height: 20px;
+            border-radius: 20px;
+            background-color: #ff4949;
+            margin-right: 5px;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .tag-cus-active{
+            background-color: #13ce66;
+        }
+
+        .auto-mode-btn {
+            background-color: #4a9eff !important;  /* 淡蓝色 */
+            border-color: #4a9eff !important;
+            color: white !important;
+        }
+        
+        .auto-mode-btn.close {
+            background-color: #244e7e !important;
+            border-color: #fdfdfd !important;
+            color: #feffff !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="header">
+            <div class="btn-left" @click="searchHosts"></div>
+            <div class="center">
+                百安消防主站控制系统
+            </div>
+            <div class="btn-right header-actions">
+                <span @click="controlPanelVisible = true">控制面板</span>
+                <span @click="backToHostSelect">返回主机选择</span>
+            </div>
+        </div>
+        <div class="title">
+            <div class="title-left">
+                探测器在线数量: {{ selectedHostInfo ? selectedHostInfo.onlineSensors : 0 }}
+            </div>
+            <div class="title-mid">
+                警报/故障数量: {{ selectedHostInfo ? selectedHostInfo.problemCount : 0 }}
+            </div>
+            <div class="title-right">
+                历史记录: {{ currentHostHistory ? currentHostHistory.length : 0 }}
+            </div>
+            
+        </div>
+        <div class="content">
+            
+            
+            <div class="left">
+                <div class="table">
+                    <div class="left_text">探测器数据
+                    </div>
+                    <el-table :data="detectors" height="160" style="width: 100%">
+                        <el-table-column prop="name" label="探测器" width="75"></el-table-column>
+                        <el-table-column prop="signal" label="信号强度" width="90"></el-table-column>
+                        <el-table-column prop="temperature" label="温度" width="60"></el-table-column>
+                        <el-table-column prop="co" label="CO" width="75"></el-table-column>
+                        <el-table-column prop="smoke" label="烟雾" width="95"></el-table-column>
+                        <el-table-column prop="voc" label="VOC" width="75"></el-table-column>
+                        <el-table-column prop="hydrogen" label="氢气"></el-table-column>
+                    </el-table>
+                </div>
+                <div class="table">
+             
+                <div class="left_text">分区控制器
+                </div>
+                <template v-if="!subboards.length">
+                    <el-empty description="暂无子板数据"></el-empty>
+                </template>
+                <template v-else>
+                    <el-table :data="subboards" height="160" style="width: 100%">
+                        <el-table-column prop="id" label="子板ID" width="80"></el-table-column>
+                        <el-table-column prop="signal" label="信号强度" width="90">
+                            <template #default="scope">
+                                {{ scope.row.signal }}%
+                            </template>
+                        </el-table-column>
+                        
+                        <el-table-column label="警报输出" width="115">
+                            <template #default="scope">
+                                <div class="td_tags">
+                                    <div
+                                    v-for="(status, index) in scope.row.outputs" 
+                                    class="tag-cus"
+                                    :class="status?'tag-cus-active':''"
+                                  >
+                                  {{ index + 1 }}: {{ status ? '开' : '关' }}
+                                </div>
+                                    <!-- <el-tag 
+                                    v-for="(status, index) in scope.row.outputs" 
+                                    :key="index"
+                                    :type="status ? 'success' : 'info'"
+                                    style="margin-right: 5px"
+                                >
+                                
+                                </el-tag> -->
+                                </div>
+                               
+                            </template>
+                        </el-table-column>
+                        
+                        <el-table-column label="报警输入">
+                            <template #default="scope">
+                                <div class="td_tags">
+                                <el-tag 
+                                    v-for="(status, index) in scope.row.inputs" 
+                                    :key="index"
+                                    :type="status ? 'warning' : 'info'"
+                                    style="margin-right: 5px"
+                                >
+                                    {{ index + 1 }}: {{ status ? '触 发' : '未触发' }}
+                                </el-tag>
+                                </div>
+                            </template>
+                        </el-table-column>
+                        
+                    </el-table>
+                </template>
+            </div>
+            </div>
+            
+            <div class="mid">
+                <template v-if="!currentHostFaults || currentHostFaults.length === 0">
+                    <el-empty description="暂无故障和警报数据"></el-empty>
+                </template>
+                <template v-else>
+                    <el-table :data="currentHostFaults" height="360" style="width: 100%">
+                        <el-table-column prop="name" label="警报/故障" width="99"></el-table-column>
+                        <el-table-column prop="description" label="描述"></el-table-column>
+                    </el-table>
+                </template>
+            </div>
+            <div class="right">
+            <template v-if="!currentHostHistory || currentHostHistory.length === 0">
+                <el-empty description="暂无历史记录数据"></el-empty>
+            </template>
+            <template v-else>
+                <el-table :data="currentHostHistory" height="360" style="width: 100%">
+                <el-table-column prop="timeText" label="时间" width="180"></el-table-column>
+                <el-table-column prop="typeText" label="故障类型" width="110"></el-table-column>
+                <el-table-column prop="message" label="具体信息"></el-table-column>
+                </el-table>
+            </template>
+            </div>
+
+        
+        </div>
+
+        <el-dialog
+            class="control-panel-dialog"
+            v-model="controlPanelVisible"
+            width="560"
+            align-center
+            :show-close="true"
+            destroy-on-close>
+            <div class="control-panel-wrap">
+                <div class="cp-box-glow cp-box-top">
+                    <i class="cp-corner cp-corner-tl"></i>
+                    <i class="cp-corner cp-corner-tr"></i>
+                    <div class="cp-ticks">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                    <div class="cp-mode-row">
+                        <span class="cp-mode-text">主机模式：{{ isAutoMode ? '自动' : '手动' }}</span>
+                        <button type="button" class="cp-hud-btn" @click="toggleHostMode">手动/自动切换</button>
+                    </div>
+                </div>
+
+                <div class="cp-box-inner" v-for="idx in 2" :key="idx">
+                    <div class="cp-fe-row">
+                        <div class="cp-fe-info">
+                            <div class="cp-fe-title">灭火器 {{ idx }}</div>
+                            <div class="cp-fe-status">当前状态：{{ getFireStatusText(idx - 1) }}</div>
+                        </div>
+                        <div class="cp-fe-actions">
+                            <button type="button" class="cp-hud-btn" @click="setFireExtinguisher(idx - 1, true)">开启</button>
+                            <button type="button" class="cp-hud-btn" @click="setFireExtinguisher(idx - 1, false)">关闭</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cp-box-glow cp-box-bottom">
+                    <i class="cp-corner cp-corner-bl"></i>
+                    <i class="cp-corner cp-corner-br"></i>
+                    <div class="cp-reset-wrap">
+                        <button type="button" class="cp-hud-btn cp-reset-btn" @click="resetHost">复位</button>
+                    </div>
+                </div>
+            </div>
+        </el-dialog>
+    </div>
+    <script src="./index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./lib/vue.js"></script>
+    <script src="./lib/element-plus.js"></script>
+    <link rel="stylesheet" href="lib/element-plus.css">
+    <script src="lib/element-plus-locale-zh-cn.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            background-color: #101129;
+        }
+
+        .header {
+            height: 80px;
+            background-image: url(./img/top.png);
+            background-size: 100% 100%;
+            text-align: center;
+            color: #fff;
+            font-size: 26px;
+            line-height: 80px;
+            position: relative;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 70px;
+        }
+
+        .btn-left {
+            position: relative;
+            font-size: 18px;
+            font-weight: 400;
+            /* background-image: url(./img/btn.png); */
+            /* background-origin: ; */
+            background-size: 100% 100%;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 0 17px;
+            cursor: pointer;
+            /* transform: rotate(180deg); */
+        }
+
+        .btn-left::after {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            content: '';
+            background-image: url(./img/btn.png);
+            background-size: 100% 100%;
+            transform: rotate(180deg);
+            transform: scaleX(-1);
+        }
+
+        .btn-right {
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 400;
+            background-image: url(./img/btn.png);
+            background-size: 100% 100%;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 0 17px;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+        }
+
+        .left {
+            width: 60%;
+            height: 100%;
+            color: #fff;
+            background-image: url(./img/image.png);
+            background-size: 100% 100%;
+            padding: 80px 30px;
+        }
+
+        .right {
+            width: 40%;
+            height: 100%;
+            color: #fff;
+            background-image: url(./img/image.png);
+            background-size: 100% 100%;
+            padding: 80px 30px;
+        }
+
+        th {
+            font-weight: 900 !important;
+            font-size: 16px;
+        }
+
+        :root {
+            --el-bg-color: #143275;
+            --el-text-color-secondary: #fff;
+            --el-fill-color-blank: #0f2e6e;
+            --el-table-text-color: #fff;
+            --el-text-color-regular: #fff;
+            --el-fill-color-light: #007bff
+        }
+        /* 连接设置弹窗里的 tab：未选中时文字为白色 */
+        .el-dialog .el-tabs__item {
+            color: #ffffff;
+        }
+
+        /* 连接设置弹窗里的 tab：选中时也为白色（可选，但推荐一起写）
+        .el-dialog .el-tabs__item.is-active {
+            color: #ffffff;
+        } */
+
+        /* el-table {
+    --el-table-border-color: var(--el-border-color-lighter);
+    --el-table-border: 1px solid var(--el-table-border-color);
+    --el-table-text-color: var(--el-text-color-regular);
+    --el-table-header-text-color: var(--el-text-color-secondary);
+    --el-table-row-hover-bg-color: var(--el-fill-color-light);
+    --el-table-current-row-bg-color: var(--el-color-primary-light-9);
+    --el-table-header-bg-color: var(--el-bg-color);
+    --el-table-fixed-box-shadow: var(--el-box-shadow-light);
+    --el-table-bg-color: var(--el-fill-color-blank);
+    --el-table-tr-bg-color: var(--el-fill-color-blank);
+    --el-table-expanded-cell-bg-color: var(--el-fill-color-blank);
+    --el-table-fixed-left-column: inset 10px 0 10px -10px rgba(0, 0, 0, 0.15);
+    --el-table-fixed-right-column: inset -10px 0 10px -10px rgba(0, 0, 0, 0.15);
+} */
+        .el-dialog {
+            border-radius: 15px;
+        }
+
+        .el-dialog__title {
+            color: #fff;
+        }
+
+        .dialog_btn_list {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        
+        <!--------------------------------------- 主页头板块 --------------->
+        <div class="header">
+            <div class="btn-left">搜索主机</div>
+            <div class="center">
+                百安消防主站控制系统
+            </div>
+            <div class="btn-right">
+                <span @click="dialogVisible = true" 
+                        style="margin-right: 20px; cursor: pointer; color: #e0e4e7;">连接设置
+                </span>
+            </div>
+        </div>
+
+
+        <div class="content">
+        <!--------------------------------------- 主页内容板块 左 -------------------------->
+            <div class="left">
+                <el-table :data="hostStatus" style="width: 100%">
+                    <el-table-column prop="hostname" label="主机号" width="80"></el-table-column>
+                    <el-table-column prop="status" label="状态" width="60">
+                        <template #default="scope">
+                            <span :style="{ color: getStatusColor(scope.row.status) }">{{ scope.row.status }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="sensorCount" label="探测器数量" width="110"></el-table-column>
+                    <el-table-column prop="faultCount" label="故障数量" width="90"></el-table-column>
+                    <el-table-column prop="alertCount" label="预警/报警数量" width="130"></el-table-column>
+                    <el-table-column prop="alertLevel" label="报警等级" width="90"></el-table-column>
+                    <el-table-column prop="jrzj" label="查看主机">
+                        <template #default="scope">
+                            <div @click="enterHost(scope.row)">进入主机</div>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+
+            <!--------------------------------------- 主页内容板块 右 -------------------------->
+            <div class="right">
+                <el-table :data="hostProblems" style="width: 100%">
+                    <el-table-column prop="hostname" label="主机号" width="95"></el-table-column>
+                    <el-table-column prop="problem" label="问题描述" min-width="200">
+                        <template #default="scope">
+                            <div
+                                :style="{ color: getProblemTextColor(scope.row), whiteSpace: 'pre-wrap', wordBreak: 'break-all' }">
+                                {{ scope.row.problem }}
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="操作" width="60" align="center">
+                        <template #default="scope">
+                            <!--el-button type="primary" link @click="viewProblemDetails(scope.row)"-->
+                            <el-button type="primary" link @click="enterHost(scope.row)">							
+                                查看
+                            </el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+        </div>
+
+
+
+
+
+        <!-- 连接设置的弹窗 -->
+        <el-dialog title="连接设置" center v-model="dialogVisible" width="500">
+            <el-tabs>
+                <!-- CAN设置选项卡 -->
+                <el-tab-pane label="CAN连接" name="can">
+                    <el-select v-model="selectedPort" placeholder="选择CAN" style="width: 100%">
+                        <el-option 
+                            v-for="(info, name) in serialPorts" 
+                            :key="name" 
+                            :label="info.Device_name"   
+                            :value="name"
+                            style="color: #000;">
+                        </el-option>
+                    </el-select>
+                    <!-- 控制弹窗按钮的地方 -->
+                    <div class="dialog_btn_list">
+                        <el-button type="primary" @click="searchSerialPorts">搜索CAN</el-button>
+                        <el-button 
+                            :type="isConnected ? 'danger' : 'success'" 
+                            @click="toggleConnect">
+                            {{ isConnected ? '断开连接' : '连接CAN' }}
+                        </el-button>
+                    </div>
+                </el-tab-pane> 
+            
+                <!-- CAN设置选项卡 -->
+                <!-- <el-tab-pane label="CAN连接" name="can">
+                    <el-select v-model="selectedCanPort" placeholder="选择CAN端口" style="width: 100%">
+                        <el-option v-for="(desc, port) in canPorts" :key="port" :label="`${port} - ${desc}`" :value="port"
+                            style="color: #000;"></el-option>
+                    </el-select>
+                    <div class="dialog_btn_list">
+                        <el-button type="primary" @click="searchCanPorts">搜索CAN</el-button>
+                        <el-button 
+                            :type="isCanConnected ? 'danger' : 'success'" 
+                            @click="toggleCanConnect">
+                            {{ isCanConnected ? '断开连接' : '连接CAN' }}
+                        </el-button>
+                    </div>
+                </el-tab-pane> -->
+            </el-tabs>
+        </el-dialog>
+    </div>
+    <script src="./index.js"></script>
+</body>
+
+</html>
